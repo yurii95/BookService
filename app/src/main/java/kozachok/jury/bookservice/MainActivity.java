@@ -44,12 +44,15 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(LOG_TAG, String.valueOf(volumeInfo));
                     Log.d(LOG_TAG,volumeInfo.getTitle());
                 } else {
+                    Log.d("response",response.message());
+                    Log.d("response",String.valueOf(response.code()));
                     Log.d("response","not successful");
                 }
             }
 
             @Override
             public void onFailure(Call<VolumeInfo> call, Throwable t) {
+                Log.d(LOG_TAG,"OnFailure");
             }
         });
     }
