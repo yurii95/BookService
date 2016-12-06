@@ -4,7 +4,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
@@ -12,61 +11,48 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.SearchView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kozachok.jury.bookservice.data.BookItem;
-import kozachok.jury.bookservice.data.BookResponse;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
 
 
 public class MainActivity extends AppCompatActivity {
-    private Retrofit retrofit = RetrofitClient.getRetofitInstance();
     private String LOG_TAG = MainActivity.class.getName();
     private RecyclerView rvItems;
     private StaggeredGridLayoutManager layoutManager;
+    private EndlessRecyclerViewScrollListener scrollListener;
+    private List<BookItem> booksList = new ArrayList<>();
+    private RecyclerView.Adapter mAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        GoogleBooksService booksService = retrofit.create(GoogleBooksService.class);
-        Call<BookResponse> call = booksService.getBooks();
-
-        call.enqueue(new Callback<BookResponse>() {
-            @Override
-            public void onResponse(Call<BookResponse> call, Response<BookResponse> response) {
-                String str="";
-                if (response.isSuccessful()) {
-                    Log.d("response",response.message());
-                    Log.d("response",String.valueOf(response.code()));
-                    BookResponse volumeInfo = response.body();
-                    Log.d(LOG_TAG, String.valueOf(volumeInfo));
-                    List<BookItem> list = volumeInfo.getItems();
-                    for(BookItem temp : list){
-                        System.out.println(temp.getVolumeInfo().getTitle());
-                        System.out.println(temp.getVolumeInfo().getPreviewLink());
-                    }
-                } else {
-
-                    Log.d("response",response.message());
-                    Log.d("response",String.valueOf(response.code()));
-                    Log.d("response","not successful");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BookResponse> call, Throwable t) {
-                Log.d(LOG_TAG,"OnFailure");
-            }
-        });
-
         rvItems = (RecyclerView) findViewById(R.id.rvBooks);
         rvItems.setHasFixedSize(true);
         layoutManager = new StaggeredGridLayoutManager(2,1);
         rvItems.setLayoutManager(layoutManager);
+
+        scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                loadNextDataFromApi(5);
+            }
+        };
+        rvItems.addOnScrollListener(scrollListener);
+        mAdapter =new MyAdapter(booksList);
+        rvItems.setAdapter(mAdapter);
+
+    }
+
+    public void loadNextDataFromApi(int offset) {
+        // Send an API request to retrieve appropriate paginated data
+        //  --> Send the request including an offset value (i.e `page`) as a query parameter.
+        //  --> Deserialize and construct new model objects from the API response
+        //  --> Append the new data objects to the existing set of items inside the array of items
+        //  --> Notify the adapter of the new items made with `notifyItemRangeInserted()`
     }
 
 
@@ -79,6 +65,23 @@ public class MainActivity extends AppCompatActivity {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                booksList = RestClient.getAllBooks();
+                // отрабатывает запрос к rest сервису, я так понимаю в отдельном потоке,
+                //так как дальше я получаю NullPointer
+                // подскажи как мне дождаться результата...
+                Log.d(LOG_TAG,"length of the list = "+booksList.size());
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
         return true;
     }
 }

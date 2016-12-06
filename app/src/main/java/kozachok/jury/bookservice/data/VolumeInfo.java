@@ -26,6 +26,7 @@ public class VolumeInfo {
     private String previewLink;
     private String infoLink;
     private String canonicalVolumeLink;
+    private ImageLinks imageLinks;
 
     @Override
     public String toString() {
