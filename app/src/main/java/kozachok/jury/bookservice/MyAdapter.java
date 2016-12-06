@@ -53,7 +53,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.BookViewHolder> {
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(BookViewHolder holder, int position) {
-        System.out.println("onBindHolder");
+        System.out.println("onBindHolderr");
         holder.book_cover.setImageResource(R.drawable.book_cover);
         holder.book_info.setText(mDataset.get(position).getVolumeInfo().getTitle());
 
