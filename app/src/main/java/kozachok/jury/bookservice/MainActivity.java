@@ -9,6 +9,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
 import android.widget.SearchView;
 
 import java.util.ArrayList;
@@ -17,13 +18,15 @@ import java.util.List;
 import kozachok.jury.bookservice.data.BookItem;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IBooksView{
     private String LOG_TAG = MainActivity.class.getName();
     private RecyclerView rvItems;
     private StaggeredGridLayoutManager layoutManager;
     private EndlessRecyclerViewScrollListener scrollListener;
     private List<BookItem> booksList = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
+    private BooksPresenter booksPresenter;
+    private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +45,15 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         rvItems.addOnScrollListener(scrollListener);
-        mAdapter =new MyAdapter(booksList);
+        mAdapter =new MyAdapter(booksList, this);
         rvItems.setAdapter(mAdapter);
+        rvItems.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        booksPresenter = new BooksPresenter(this,this);
 
     }
 
@@ -63,17 +73,13 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.main_menu, menu);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                booksList = RestClient.getAllBooks();
-                // отрабатывает запрос к rest сервису, я так понимаю в отдельном потоке,
-                //так как дальше я получаю NullPointer
-                // подскажи как мне дождаться результата...
-                Log.d(LOG_TAG,"length of the list = "+booksList.size());
-
+                booksPresenter.loadBooks();
+                searchView.clearFocus();
                 return true;
             }
 
@@ -84,4 +90,13 @@ public class MainActivity extends AppCompatActivity {
         });
         return true;
     }
+
+    @Override
+    public void onBooksLoaded(List<BookItem> books) {
+        for (BookItem temp : books) {
+            booksList.add(temp);
+        }
+        mAdapter.notifyDataSetChanged();
+    }
+
 }

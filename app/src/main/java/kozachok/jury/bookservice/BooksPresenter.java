@@ -1,42 +1,36 @@
 package kozachok.jury.bookservice;
 
+import android.content.Context;
 import android.util.Log;
-
-import java.util.List;
-
-import kozachok.jury.bookservice.data.BookItem;
 import kozachok.jury.bookservice.data.BookResponse;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-/**
- * Created by Юрий on 05.12.2016.
- */
-public class RestClient {
-    private static Retrofit retrofit = RetrofitClient.getRetofitInstance();
-    private static GoogleBooksService booksService = retrofit.create(GoogleBooksService.class);
-    private static Call<BookResponse> call = booksService.getBooks();
-    private static List<BookItem> books;
+public class BooksPresenter {
 
-    public static  List<BookItem> getAllBooks() {
+    private Context context;
+    private IBooksView iBooksView;
+    private  Retrofit retrofit = RetrofitClient.getRetofitInstance();
+    private  GoogleBooksService booksService = retrofit.create(GoogleBooksService.class);
+    private  Call<BookResponse> call = booksService.getBooks();
 
+    public BooksPresenter(Context context, IBooksView iBooksView){
+        this.context = context;
+        this.iBooksView = iBooksView;
+    }
+
+    public void loadBooks(){
         call.enqueue(new Callback<BookResponse>() {
             @Override
             public void onResponse(Call<BookResponse> call, Response<BookResponse> response) {
-                String str = "";
                 if (response.isSuccessful()) {
                     Log.d("response", response.message());
                     Log.d("response", String.valueOf(response.code()));
                     BookResponse volumeInfo = response.body();
-                    books = volumeInfo.getItems();
-                    for (BookItem temp : books) {
-                        System.out.println(temp.getVolumeInfo().getTitle());
-                        System.out.println(temp.getVolumeInfo().getPreviewLink());
-                    }
+                    iBooksView.onBooksLoaded(volumeInfo.getItems());
                 } else {
-
                     Log.d("response", response.message());
                     Log.d("response", String.valueOf(response.code()));
                     Log.d("response", "not successful");
@@ -47,8 +41,6 @@ public class RestClient {
             public void onFailure(Call<BookResponse> call, Throwable t) {
             }
         });
-        return books;
+
     }
-
-
 }
