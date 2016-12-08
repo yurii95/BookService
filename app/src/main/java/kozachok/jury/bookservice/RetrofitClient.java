@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class RetrofitClient {
     private static Retrofit retrofit;
-    private static String BASE_URL = "https://www.googleapis.com/books/v1/";
+    private static String BASE_URL = "https://www.googleapis.com/books/v1/volumes/";
 
     public RetrofitClient() {
     }

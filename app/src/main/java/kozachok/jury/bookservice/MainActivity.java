@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
     private RecyclerView.Adapter mAdapter;
     private BooksPresenter booksPresenter;
     private SearchView searchView;
+    private int offset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,28 +42,25 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
         scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                loadNextDataFromApi(5);
+                loadNextDataFromApi(totalItemsCount);
             }
         };
         rvItems.addOnScrollListener(scrollListener);
         mAdapter =new MyAdapter(booksList, this);
         rvItems.setAdapter(mAdapter);
-        rvItems.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-        booksPresenter = new BooksPresenter(this,this);
 
     }
 
     public void loadNextDataFromApi(int offset) {
+        System.out.println("offset = "+offset);
         // Send an API request to retrieve appropriate paginated data
         //  --> Send the request including an offset value (i.e `page`) as a query parameter.
         //  --> Deserialize and construct new model objects from the API response
         //  --> Append the new data objects to the existing set of items inside the array of items
         //  --> Notify the adapter of the new items made with `notifyItemRangeInserted()`
+        this.offset = offset;
+        booksPresenter.setStartIndex(offset);
+        booksPresenter.loadBooks();
     }
 
 
@@ -78,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                sendQuery(query);
                 booksPresenter.loadBooks();
                 searchView.clearFocus();
                 return true;
@@ -89,6 +88,11 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
             }
         });
         return true;
+    }
+
+    public void sendQuery(String query){
+        System.out.println("ушло offset = "+ offset);
+        booksPresenter = new BooksPresenter(this, query, offset);
     }
 
     @Override

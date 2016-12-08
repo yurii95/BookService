@@ -10,9 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
-
 import kozachok.jury.bookservice.data.BookItem;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.BookViewHolder> {
@@ -58,8 +58,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.BookViewHolder> {
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(BookViewHolder holder, int position) {
-        holder.book_cover.setImageResource(R.drawable.photo);
-        holder.book_info.setText(books_list.get(position).getVolumeInfo().getTitle());
+//        holder.book_cover.setImageResource(R.drawable.photo);
+        if(books_list.get(position).getVolumeInfo().getImageLinks().getThumbnail() != null) {
+            Picasso.with(context).load(books_list.get(position).getVolumeInfo().
+                    getImageLinks().getThumbnail()).placeholder(R.drawable.book_image).
+                    into(holder.book_cover);
+            holder.book_info.setText(books_list.get(position).getVolumeInfo().getTitle());
+        }
     }
 
     @Override

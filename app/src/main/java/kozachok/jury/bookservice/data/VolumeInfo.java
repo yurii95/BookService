@@ -336,5 +336,11 @@ public class VolumeInfo {
         this.canonicalVolumeLink = canonicalVolumeLink;
     }
 
+    public ImageLinks getImageLinks() {
+        return imageLinks;
+    }
 
+    public void setImageLinks(ImageLinks imageLinks) {
+        this.imageLinks = imageLinks;
+    }
 }

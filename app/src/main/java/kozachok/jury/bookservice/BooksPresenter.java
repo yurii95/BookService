@@ -9,16 +9,20 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class BooksPresenter {
-
-    private Context context;
     private IBooksView iBooksView;
     private  Retrofit retrofit = RetrofitClient.getRetofitInstance();
-    private  GoogleBooksService booksService = retrofit.create(GoogleBooksService.class);
-    private  Call<BookResponse> call = booksService.getBooks();
+    private  GoogleBooksService booksService;
+    private  Call<BookResponse> call;
+    private int startIndex;
+    private String query;
 
-    public BooksPresenter(Context context, IBooksView iBooksView){
-        this.context = context;
+    public BooksPresenter(IBooksView iBooksView, String query , int startIndex){
         this.iBooksView = iBooksView;
+        this.startIndex = startIndex;
+        if(query!=null)
+            this.query =query;
+        booksService = retrofit.create(GoogleBooksService.class);
+        call = booksService.getBooks(this.query, startIndex);
     }
 
     public void loadBooks(){
@@ -31,6 +35,7 @@ public class BooksPresenter {
                     BookResponse volumeInfo = response.body();
                     iBooksView.onBooksLoaded(volumeInfo.getItems());
                 } else {
+
                     Log.d("response", response.message());
                     Log.d("response", String.valueOf(response.code()));
                     Log.d("response", "not successful");
@@ -42,5 +47,9 @@ public class BooksPresenter {
             }
         });
 
+    }
+
+    public void setStartIndex(int startIndex) {
+        this.startIndex = startIndex;
     }
 }
