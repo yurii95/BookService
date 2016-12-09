@@ -9,6 +9,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class BooksPresenter {
+    private String LOG_TAG = MainActivity.class.getName();
     private IBooksView iBooksView;
     private  Retrofit retrofit = RetrofitClient.getRetofitInstance();
     private  GoogleBooksService booksService;
@@ -22,30 +23,30 @@ public class BooksPresenter {
         if(query!=null)
             this.query =query;
         booksService = retrofit.create(GoogleBooksService.class);
-        call = booksService.getBooks(this.query, startIndex);
+
     }
 
     public void loadBooks(){
-        call.enqueue(new Callback<BookResponse>() {
-            @Override
-            public void onResponse(Call<BookResponse> call, Response<BookResponse> response) {
-                if (response.isSuccessful()) {
-                    Log.d("response", response.message());
-                    Log.d("response", String.valueOf(response.code()));
-                    BookResponse volumeInfo = response.body();
-                    iBooksView.onBooksLoaded(volumeInfo.getItems());
-                } else {
-
-                    Log.d("response", response.message());
-                    Log.d("response", String.valueOf(response.code()));
-                    Log.d("response", "not successful");
+        call = booksService.getBooks(this.query, startIndex);
+        if(!call.isExecuted()) {
+            call.enqueue(new Callback<BookResponse>() {
+                @Override
+                public void onResponse(Call<BookResponse> call, Response<BookResponse> response) {
+                    if (response.isSuccessful()) {
+                        Log.i(LOG_TAG, "response is "+response.message());
+                        BookResponse volumeInfo = response.body();
+                        iBooksView.onBooksLoaded(volumeInfo.getItems());
+                    } else {
+                        Log.i(LOG_TAG,"response is "+response.message());
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<BookResponse> call, Throwable t) {
-            }
-        });
+                @Override
+                public void onFailure(Call<BookResponse> call, Throwable t) {
+                    Log.i(LOG_TAG, "response is failure");
+                }
+            });
+        }
 
     }
 

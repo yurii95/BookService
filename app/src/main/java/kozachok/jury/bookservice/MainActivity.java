@@ -53,11 +53,6 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
 
     public void loadNextDataFromApi(int offset) {
         System.out.println("offset = "+offset);
-        // Send an API request to retrieve appropriate paginated data
-        //  --> Send the request including an offset value (i.e `page`) as a query parameter.
-        //  --> Deserialize and construct new model objects from the API response
-        //  --> Append the new data objects to the existing set of items inside the array of items
-        //  --> Notify the adapter of the new items made with `notifyItemRangeInserted()`
         this.offset = offset;
         booksPresenter.setStartIndex(offset);
         booksPresenter.loadBooks();
@@ -76,6 +71,10 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                scrollListener.reset();
+                booksList.clear();
+                mAdapter.notifyDataSetChanged();
+                offset = 0;
                 sendQuery(query);
                 booksPresenter.loadBooks();
                 searchView.clearFocus();
@@ -97,10 +96,13 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
 
     @Override
     public void onBooksLoaded(List<BookItem> books) {
-        for (BookItem temp : books) {
-            booksList.add(temp);
+        if(books!=null) {
+            if (books.size() != 0) {
+                for (BookItem temp : books) {
+                    booksList.add(temp);
+                }
+                mAdapter.notifyDataSetChanged();
+            }
         }
-        mAdapter.notifyDataSetChanged();
     }
-
 }

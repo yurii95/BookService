@@ -53,8 +53,9 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         } else if (mLayoutManager instanceof LinearLayoutManager) {
             lastVisibleItemPosition = ((LinearLayoutManager) mLayoutManager).findLastVisibleItemPosition();
         }
-        System.out.println("totalItemCount = "+ totalItemCount);
-        System.out.println("previousTotalItemCount = "+ previousTotalItemCount);
+//        System.out.println("last visible possition = "+ lastVisibleItemPosition);
+//        System.out.println("totalItemCount = "+ totalItemCount);
+//        System.out.println("previousTotalItemCount = "+ previousTotalItemCount);
         if (totalItemCount < previousTotalItemCount) {
             this.currentPage = this.startingPageIndex;
             this.previousTotalItemCount = totalItemCount;
@@ -64,8 +65,7 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         }
         // If it’s still loading, we check to see if the dataset count has
         // changed, if so we conclude it has finished loading and update the current page
-        // number and total item count.
-        System.out.println("loading= "+loading);
+
         if (loading && (totalItemCount > previousTotalItemCount)) {
             loading = false;
             previousTotalItemCount = totalItemCount;
@@ -75,8 +75,8 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         // the visibleThreshold and need to reload more data.
         // If we do need to reload some more data, we execute onLoadMore to fetch the data.
         // threshold should reflect how many total columns there are too
-        System.out.println("last = "+ (lastVisibleItemPosition + visibleThreshold));
-        System.out.println("total= "+ totalItemCount);
+//        System.out.println("last = "+ (lastVisibleItemPosition + visibleThreshold));
+//        System.out.println("total= "+ totalItemCount);
         if (!loading && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
             currentPage++;
             onLoadMore(currentPage, totalItemCount, view);
@@ -84,7 +84,7 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         }
     }
 
-    public void resetState() {
+    public void reset() {
         this.currentPage = this.startingPageIndex;
         this.previousTotalItemCount = 0;
         this.loading = true;
