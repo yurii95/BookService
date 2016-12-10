@@ -35,7 +35,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.BookViewHolder> {
 
         @Override
         public void onClick(View v) {
-            System.out.println(getAdapterPosition());
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MyAdapter.books_list.
                     get(getAdapterPosition()).getVolumeInfo().getPreviewLink()));
             MyAdapter.context.startActivity(intent);
@@ -61,16 +60,19 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.BookViewHolder> {
 //        holder.book_cover.setImageResource(R.drawable.photo);
 //        System.out.println("Position = "+books_list.get(position).getVolumeInfo().getImageLinks());
 //        System.out.println("Position = "+);
-        if(books_list.get(position) != null &&
-                books_list.get(position).getVolumeInfo() != null &&
-                books_list.get(position).getVolumeInfo().getImageLinks() != null &&
-                books_list.get(position).getVolumeInfo().getImageLinks().getThumbnail() != null &&
-                books_list.get(position).getVolumeInfo().getTitle() != null) {
+
+//        if(books_list.get(position) != null &&
+//                books_list.get(position).getVolumeInfo() != null &&
+//                books_list.get(position).getVolumeInfo().getImageLinks() != null &&
+//                books_list.get(position).getVolumeInfo().getImageLinks().getThumbnail() != null &&
+//                books_list.get(position).getVolumeInfo().getTitle() != null) {
+
+
             Picasso.with(context).load(books_list.get(position).getVolumeInfo().
                     getImageLinks().getThumbnail()).placeholder(R.drawable.book_image).
                     into(holder.book_cover);
             holder.book_info.setText(books_list.get(position).getVolumeInfo().getTitle());
-        }
+//        }
     }
 
     @Override

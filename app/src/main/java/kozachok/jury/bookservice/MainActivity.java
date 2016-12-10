@@ -2,13 +2,16 @@ package kozachok.jury.bookservice;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
 
@@ -28,17 +31,29 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
     private BooksPresenter booksPresenter;
     private SearchView searchView;
     private int offset;
+    private CharSequence query = "";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        if(searchView != null)
+            query = searchView.getQuery();
+        if (savedInstanceState != null) {
+            booksList = savedInstanceState.getParcelableArrayList("book_list");
+            offset = savedInstanceState.getInt("offset");
+            query = savedInstanceState.getCharSequence("query");
+            booksPresenter = new BooksPresenter(this, query.toString(), offset);
+            booksPresenter.loadBooks();
+        }
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+            layoutManager = new StaggeredGridLayoutManager(3, 1);
+        else
+            layoutManager = new StaggeredGridLayoutManager(2,1);
         rvItems = (RecyclerView) findViewById(R.id.rvBooks);
         rvItems.setHasFixedSize(true);
-        layoutManager = new StaggeredGridLayoutManager(2,1);
         rvItems.setLayoutManager(layoutManager);
-
         scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
@@ -49,28 +64,37 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
         mAdapter =new MyAdapter(booksList, this);
         rvItems.setAdapter(mAdapter);
 
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("offset", offset);
+        outState.putCharSequence("query", query);
+        outState.putParcelableArrayList("book_list",(ArrayList<? extends Parcelable>)booksList);
+        super.onSaveInstanceState(outState);
     }
 
     public void loadNextDataFromApi(int offset) {
-        System.out.println("offset = "+offset);
         this.offset = offset;
         booksPresenter.setStartIndex(offset);
         booksPresenter.loadBooks();
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+//                for (BookItem temp : booksList) {
+//                    System.out.println(temp.getVolumeInfo().toString());;
+//                }
                 scrollListener.reset();
                 booksList.clear();
                 mAdapter.notifyDataSetChanged();
@@ -89,19 +113,37 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
         return true;
     }
 
+    // set focus immediately after click search button
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.search:
+                searchView.setQuery(query,false);
+                searchView.setIconified(false);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     public void sendQuery(String query){
         System.out.println("ушло offset = "+ offset);
+        this.query =query;
         booksPresenter = new BooksPresenter(this, query, offset);
     }
 
     @Override
     public void onBooksLoaded(List<BookItem> books) {
-        if(books!=null) {
+        if (books != null) {
             if (books.size() != 0) {
                 for (BookItem temp : books) {
-                    booksList.add(temp);
+                    if (temp != null && temp.getVolumeInfo() != null &&
+                            temp.getVolumeInfo().getImageLinks() != null &&
+                            temp.getVolumeInfo().getImageLinks().getThumbnail() != null &&
+                            temp.getVolumeInfo().getTitle() != null) {
+                        booksList.add(temp);
+                    }
+                    mAdapter.notifyDataSetChanged();
                 }
-                mAdapter.notifyDataSetChanged();
             }
         }
     }

@@ -32,22 +32,7 @@ public class VolumeInfo {
     public String toString() {
         return "VolumeInfo{" +
                 "title='" + title + '\'' +
-                ", subtitle='" + subtitle + '\'' +
-                ", authors=" + authors +
-                ", publisher='" + publisher + '\'' +
-                ", publishedDate='" + publishedDate + '\'' +
-                ", description='" + description + '\'' +
-                ", pageCount=" + pageCount +
-                ", printType='" + printType + '\'' +
-                ", categories=" + categories +
-                ", maturityRating='" + maturityRating + '\'' +
-                ", allowAnonLogging=" + allowAnonLogging +
-                ", contentVersion='" + contentVersion + '\'' +
-                ", language='" + language + '\'' +
-                ", previewLink='" + previewLink + '\'' +
-                ", infoLink='" + infoLink + '\'' +
-                ", canonicalVolumeLink='" + canonicalVolumeLink + '\'' +
-                '}';
+                ", image='" + imageLinks.getThumbnail()+   '}';
     }
 
 
