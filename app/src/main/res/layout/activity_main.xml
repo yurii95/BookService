@@ -28,23 +28,14 @@
             android:background="#c3d5ff"
             android:textColor="#120077" />
     </LinearLayout>
-    <!--<RelativeLayout-->
-        <!--android:id="@+id/progressBarlayout"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:visibility="gone"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:layout_marginTop="50dp">-->
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:id="@+id/download_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:visibility="gone">
+    </ProgressBar>
 
-        <ProgressBar
-            style="?android:attr/progressBarStyleLarge"
-            android:id="@+id/download_progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="50dp"
-            android:visibility="gone">
-        </ProgressBar>
-            <!--/>-->
-    <!--</RelativeLayout>-->
 </RelativeLayout>

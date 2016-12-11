@@ -1,13 +1,6 @@
 
 package kozachok.jury.bookservice.data;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class VolumeInfo {
     private String title;
@@ -30,12 +23,12 @@ public class VolumeInfo {
         return imageLinks;
     }
 
-    public String getPreviewLink() {
-        return previewLink;
-    }
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
         VolumeInfo that = (VolumeInfo) o;
 
         return title.equals(that.title);
@@ -46,4 +39,9 @@ public class VolumeInfo {
     public int hashCode() {
         return title.hashCode();
     }
+
+    public String getInfoLink() {
+        return infoLink;
+    }
+
 }

@@ -7,4 +7,5 @@ import kozachok.jury.bookservice.data.BookItem;
 public interface IBooksView {
     void onBooksLoaded(List<BookItem> books);
     void showRefreshButton();
+    void onBooksLoading();
 }

@@ -21,9 +21,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.BookViewHolder> {
 
 
     public static class BookViewHolder extends RecyclerView.ViewHolder  implements View.OnClickListener {
-        CardView cv;
-        ImageView book_cover;
-        TextView book_info;
+        public CardView cv;
+        public ImageView book_cover;
+        public TextView book_info;
 
         public BookViewHolder(View v) {
             super(v);
@@ -33,17 +33,18 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.BookViewHolder> {
             cv.setOnClickListener(this);
         }
 
+        //following a link in new Activity (browser)
         @Override
         public void onClick(View v) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MyAdapter.books_list.
-                    get(getAdapterPosition()).getVolumeInfo().getPreviewLink()));
-            MyAdapter.context.startActivity(intent);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(books_list.
+                    get(getAdapterPosition()).getVolumeInfo().getInfoLink()));
+            context.startActivity(intent);
         }
     }
 
     public MyAdapter(List<BookItem> list, Context context) {
         books_list = list;
-        this.context = context;
+        MyAdapter.context = context;
     }
 
     // Create new views (invoked by the layout manager)
@@ -54,25 +55,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.BookViewHolder> {
         return new BookViewHolder(v);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(BookViewHolder holder, int position) {
-//        holder.book_cover.setImageResource(R.drawable.photo);
-//        System.out.println("Position = "+books_list.get(position).getVolumeInfo().getImageLinks());
-//        System.out.println("Position = "+);
-
-//        if(books_list.get(position) != null &&
-//                books_list.get(position).getVolumeInfo() != null &&
-//                books_list.get(position).getVolumeInfo().getImageLinks() != null &&
-//                books_list.get(position).getVolumeInfo().getImageLinks().getThumbnail() != null &&
-//                books_list.get(position).getVolumeInfo().getTitle() != null) {
-
-
-            Picasso.with(context).load(books_list.get(position).getVolumeInfo().
-                    getImageLinks().getThumbnail()).placeholder(R.drawable.book_image).
-                    into(holder.book_cover);
-            holder.book_info.setText(books_list.get(position).getVolumeInfo().getTitle());
-//        }
+        Picasso.with(context).load(books_list.get(position).getVolumeInfo().
+                getImageLinks().getThumbnail()).placeholder(R.drawable.book_image).
+                into(holder.book_cover);
+        holder.book_info.setText(books_list.get(position).getVolumeInfo().getTitle());
     }
 
     @Override

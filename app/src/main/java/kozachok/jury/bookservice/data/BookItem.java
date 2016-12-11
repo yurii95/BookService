@@ -3,11 +3,7 @@ package kozachok.jury.bookservice.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.Serializable;
 
-/**
- * Created by Юрий on 04.12.2016.
- */
 public class BookItem implements Parcelable{
     private VolumeInfo volumeInfo;
 
@@ -39,13 +35,14 @@ public class BookItem implements Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(volumeInfo.getTitle());
         dest.writeString(volumeInfo.getImageLinks().getThumbnail());
-        dest.writeString(volumeInfo.getPreviewLink());
+        dest.writeString(volumeInfo.getInfoLink());
     }
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         BookItem bookItem = (BookItem) o;
-
         return volumeInfo.equals(bookItem.volumeInfo);
 
     }

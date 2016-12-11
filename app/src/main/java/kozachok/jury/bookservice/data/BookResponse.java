@@ -4,9 +4,6 @@ import java.util.List;
 
 import kozachok.jury.bookservice.data.BookItem;
 
-/**
- * Created by Юрий on 04.12.2016.
- */
 public class BookResponse {
     private String kind;
     private int totalCount;

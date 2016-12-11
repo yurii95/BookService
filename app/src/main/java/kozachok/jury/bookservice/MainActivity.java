@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -28,15 +27,13 @@ import kozachok.jury.bookservice.data.BookItem;
 public class MainActivity extends AppCompatActivity implements IBooksView{
     private String LOG_TAG = MainActivity.class.getName();
     private RecyclerView rvItems;
-    private StaggeredGridLayoutManager layoutManager;
     private EndlessRecyclerViewScrollListener scrollListener;
     private List<BookItem> booksList = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
     private BooksPresenter booksPresenter;
     private SearchView searchView;
     private int offset;
-    private CharSequence query = "";
-    private Button btnRefresh;
+    private CharSequence query;
     private ProgressBar download_progress;
 
 
@@ -45,17 +42,20 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        btnRefresh = (Button) findViewById(R.id.button);
+        query = "";
         download_progress = (ProgressBar)findViewById(R.id.download_progress);
 
+        Button btnRefresh = (Button) findViewById(R.id.button);
         btnRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.i(LOG_TAG, " reconnect");
                 download_progress.setVisibility(View.VISIBLE);
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)rvItems.getLayoutParams();
                 params.weight = 0;
                 rvItems.setLayoutParams(params);
-                loadNextDataFromApi(offset);
+                booksPresenter.loadBooks();
+//                loadNextDataFromApi(offset);
             }
         });
 
@@ -63,44 +63,44 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
             query = searchView.getQuery();
         }
         if (savedInstanceState != null) {
+            Log.i(LOG_TAG, " restitution");
             booksList = savedInstanceState.getParcelableArrayList("book_list");
             offset = savedInstanceState.getInt("offset");
             query = savedInstanceState.getCharSequence("query");
-            booksPresenter = new BooksPresenter(this, query.toString(), offset);
-            booksPresenter.loadBooks();
+            booksPresenter = new BooksPresenter(this, query, offset);
+//            booksPresenter.loadBookvs();
         }
+
+        StaggeredGridLayoutManager layoutManager;
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
             layoutManager = new StaggeredGridLayoutManager(3, 1);
         else
             layoutManager = new StaggeredGridLayoutManager(2,1);
+
         rvItems = (RecyclerView) findViewById(R.id.rvBooks);
         rvItems.setHasFixedSize(true);
         rvItems.setLayoutManager(layoutManager);
         scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                loadNextDataFromApi(totalItemsCount);
+                offset = totalItemsCount;
+                booksPresenter.setStartIndex(offset);
+                booksPresenter.loadBooks();
             }
         };
         rvItems.addOnScrollListener(scrollListener);
         mAdapter =new MyAdapter(booksList, this);
         rvItems.setAdapter(mAdapter);
 
-
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        Log.i(LOG_TAG, " saving state");
         outState.putInt("offset", offset);
         outState.putCharSequence("query", query);
         outState.putParcelableArrayList("book_list",(ArrayList<? extends Parcelable>)booksList);
         super.onSaveInstanceState(outState);
-    }
-
-    public void loadNextDataFromApi(int offset) {
-        this.offset = offset;
-        booksPresenter.setStartIndex(offset);
-        booksPresenter.loadBooks();
     }
 
     @Override
@@ -114,15 +114,14 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-//                for (BookItem temp : booksList) {
-//                    System.out.println(temp.getVolumeInfo().toString());;
-//                }
+                Log.i(LOG_TAG, " submit query");
                 download_progress.setVisibility(View.VISIBLE);
                 scrollListener.reset();
                 booksList.clear();
                 mAdapter.notifyDataSetChanged();
                 offset = 0;
-                sendQuery(query);
+                MainActivity.this.query = query;
+                booksPresenter = new BooksPresenter(MainActivity.this, query, offset);
                 booksPresenter.loadBooks();
                 searchView.clearFocus();
                 return true;
@@ -148,27 +147,20 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
         return super.onOptionsItemSelected(item);
     }
 
-    public void sendQuery(String query){
-        System.out.println("ушло offset = "+ offset);
-        this.query =query;
-        booksPresenter = new BooksPresenter(this, query, offset);
-    }
-
+    // add new data to list
     @Override
     public void onBooksLoaded(List<BookItem> books) {
         download_progress.setVisibility(View.GONE);
-        if (books != null) {
-            if (books.size() != 0) {
-                for (BookItem temp : books) {
-                    if (temp != null && temp.getVolumeInfo() != null &&
-                            temp.getVolumeInfo().getImageLinks() != null &&
-                            temp.getVolumeInfo().getImageLinks().getThumbnail() != null &&
-                            temp.getVolumeInfo().getTitle() != null &&
-                            !booksList.contains(temp)) {
-                        booksList.add(temp);
-                    }
-                    mAdapter.notifyDataSetChanged();
+        if (books != null && books.size() != 0) {
+            for (BookItem temp : books) {
+                if (temp != null && temp.getVolumeInfo() != null &&
+                        temp.getVolumeInfo().getImageLinks() != null &&
+                        temp.getVolumeInfo().getImageLinks().getThumbnail() != null &&
+                        temp.getVolumeInfo().getTitle() != null &&
+                        !booksList.contains(temp)) {
+                    booksList.add(temp);
                 }
+                mAdapter.notifyDataSetChanged();
             }
         }
     }
@@ -179,5 +171,11 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)rvItems.getLayoutParams();
         params.weight = 0.9f;
         rvItems.setLayoutParams(params);
+    }
+
+
+    @Override
+    public void onBooksLoading() {
+        download_progress.setVisibility(View.VISIBLE);
     }
 }

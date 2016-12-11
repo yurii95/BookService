@@ -3,7 +3,6 @@ package kozachok.jury.bookservice;
 import kozachok.jury.bookservice.data.BookResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface GoogleBooksService {
