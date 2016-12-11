@@ -2,6 +2,11 @@ package kozachok.jury.bookservice;
 
 import android.content.Context;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import kozachok.jury.bookservice.data.BookItem;
 import kozachok.jury.bookservice.data.BookResponse;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,6 +38,7 @@ public class BooksPresenter {
         call = booksService.getBooks(this.query, startIndex);
         if(!call.isExecuted()) {
             call.enqueue(new Callback<BookResponse>() {
+
                 @Override
                 public void onResponse(Call<BookResponse> call, Response<BookResponse> response) {
                     if (response.isSuccessful()) {
@@ -45,10 +51,26 @@ public class BooksPresenter {
                 @Override
                 public void onFailure(Call<BookResponse> call, Throwable t) {
                     Log.i(LOG_TAG, "response is failure");
+                    iBooksView.showRefreshButton();
                 }
             });
         }
+    }
 
+    public List<BookItem> deleteDuplicates(List<BookItem> d_list){
+        List<BookItem> finalList = new ArrayList<>();
+        System.out.println("before "+ d_list.size());
+        for (BookItem temp : d_list) {
+//            System.out.println(temp.getVolumeInfo().getTitle());
+            if (!finalList.contains(temp)) {
+                finalList.add(temp);
+            }
+        }
+        System.out.println("final size " + finalList.size());
+//        for (BookItem temp : finalList) {
+//            System.out.println(temp.getVolumeInfo().getTitle());
+//        }
+        return finalList;
     }
 
     public void setStartIndex(int startIndex) {

@@ -7,6 +7,6 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface GoogleBooksService {
-    @GET("?&key=AIzaSyDYxnciDQ6KUwEJCJgynVDpQTu0O3ahNfQ")
+    @GET("?&key=AIzaSyDYxnciDQ6KUwEJCJgynVDpQTu0O3ahNfQ&maxResults=25")
     Call<BookResponse> getBooks(@Query("q") String author, @Query("startIndex") int index);
 }

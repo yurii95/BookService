@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -13,6 +14,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 
 import java.util.ArrayList;
@@ -32,14 +36,32 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
     private SearchView searchView;
     private int offset;
     private CharSequence query = "";
+    private Button btnRefresh;
+    private ProgressBar download_progress;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if(searchView != null)
+        btnRefresh = (Button) findViewById(R.id.button);
+        download_progress = (ProgressBar)findViewById(R.id.download_progress);
+
+        btnRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                download_progress.setVisibility(View.VISIBLE);
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)rvItems.getLayoutParams();
+                params.weight = 0;
+                rvItems.setLayoutParams(params);
+                loadNextDataFromApi(offset);
+            }
+        });
+
+        if(searchView != null) {
             query = searchView.getQuery();
+        }
         if (savedInstanceState != null) {
             booksList = savedInstanceState.getParcelableArrayList("book_list");
             offset = savedInstanceState.getInt("offset");
@@ -95,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
 //                for (BookItem temp : booksList) {
 //                    System.out.println(temp.getVolumeInfo().toString());;
 //                }
+                download_progress.setVisibility(View.VISIBLE);
                 scrollListener.reset();
                 booksList.clear();
                 mAdapter.notifyDataSetChanged();
@@ -133,18 +156,28 @@ public class MainActivity extends AppCompatActivity implements IBooksView{
 
     @Override
     public void onBooksLoaded(List<BookItem> books) {
+        download_progress.setVisibility(View.GONE);
         if (books != null) {
             if (books.size() != 0) {
                 for (BookItem temp : books) {
                     if (temp != null && temp.getVolumeInfo() != null &&
                             temp.getVolumeInfo().getImageLinks() != null &&
                             temp.getVolumeInfo().getImageLinks().getThumbnail() != null &&
-                            temp.getVolumeInfo().getTitle() != null) {
+                            temp.getVolumeInfo().getTitle() != null &&
+                            !booksList.contains(temp)) {
                         booksList.add(temp);
                     }
                     mAdapter.notifyDataSetChanged();
                 }
             }
         }
+    }
+
+    @Override
+    public void showRefreshButton() {
+        download_progress.setVisibility(View.GONE);
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)rvItems.getLayoutParams();
+        params.weight = 0.9f;
+        rvItems.setLayoutParams(params);
     }
 }

@@ -41,4 +41,17 @@ public class BookItem implements Parcelable{
         dest.writeString(volumeInfo.getImageLinks().getThumbnail());
         dest.writeString(volumeInfo.getPreviewLink());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        BookItem bookItem = (BookItem) o;
+
+        return volumeInfo.equals(bookItem.volumeInfo);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return volumeInfo.hashCode();
+    }
 }
